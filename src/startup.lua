@@ -1,0 +1,1 @@
+dofile("/.sPhone/init.lua")
