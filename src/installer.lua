@@ -10,6 +10,7 @@ local files = {
     [".sPhone/system/init.lua"] = "system/init.lua",
     [".sPhone/system/vfs.lua"] = "system/vfs.lua",
     [".sPhone/system/spk.lua"] = "system/spk.lua",
+    [".sPhone/system/appdata.lua"] = "system/appdata.lua",
     ["startup"] = "startup.lua"
 }
 
