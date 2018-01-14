@@ -1,4 +1,8 @@
--- sPhone 2.0
+--[[
+-- sPhone 2.0 for ComputerCraft
+-- Copyright (c) 2018 Ale32bit
+-- LICENSE: GNU GPLv3 (https://github.com/Ale32bit/sPhone-2/blob/master/LICENSE)
+]]--
 
 local args = {...}
 
@@ -11,14 +15,17 @@ local function panic(reason)
   term.setCursorPos(1,1)
   print("sPhone crashed")
   print(reason or "Unknwon error")
-  while true do
-    sleep(3600)
-  end
+  coroutine.yield("sPhone forcekill panic")
+    _G.term = nil
 end
 
 _G.sPhone = {
   version = "2.0",
 }
+
+os.version = function()
+    return "sPhone "..sPhone.version
+end
 
 function sPhone.require(lib)
     if not lib then
@@ -61,7 +68,16 @@ end
 
 
 local function init(...)
-    print(table.concat(({...})[1]," "))
+    print("ARGS: "..table.concat(({...})[1]," "))
+    local spkf = loadfile(".sPhone/system/spk.lua")
+    if not spkf then
+        panic("Could not load SPK")
+    end
+    local ok, err = pcall(spkf)
+    if not ok then
+        printError(err)
+    end
+
 end
 
 -- Task Handler
