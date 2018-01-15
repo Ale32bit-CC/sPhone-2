@@ -21,7 +21,8 @@ end
 local nativeFS = deepCopy(_G.fs)
 
 
-local args = {...}
+local args = {... }
+local task = {}
 
 --BIOS
 
@@ -106,17 +107,33 @@ if not normalBoot then
     return false
 end
 
+local inPanic = false
+
 -- Crash function
 
 local function panic(reason)
+    inPanic = true
+    if task then
+        for k in pairs(task.list()) do
+            pcall(function()
+                task.kill(k)
+            end)
+        end
+    end
   term.setBackgroundColor(colors.black)
   term.setTextColor(colors.white)
   term.clear()
   term.setCursorPos(1,1)
   print("sPhone crashed")
-  print(reason or "Unknwon error")
-  coroutine.yield("sPhone forcekill panic")
-    _G.term = nil
+  if not reason then
+      print("Unknown reason")
+  elseif reason and not debug then
+      print(reason)
+  elseif reason and debug then
+      print(debug.traceback(reason))
+  else -- just in case
+      print(reason)
+  end
 end
 
 _G.sPhone = {
@@ -171,7 +188,7 @@ local function init(...)
     print("ARGS: "..table.concat(({...})[1]," "))
     local spkf = loadfile(".sPhone/system/spk.lua")
     if not spkf then
-        panic("Could not load SPK")
+        panic("Could not load SPK module")
     end
     local ok, err = pcall(spkf)
     if not ok then
@@ -181,7 +198,6 @@ local function init(...)
 end
 
 -- Task Handler
-local task = {}
 local processes = {}
 local toKill = {}
 
@@ -241,5 +257,11 @@ while processes[1] ~= nil do
     for pid in pairs(toKill) do
         processes[pid] = nil
         toKill[pid] = nil
+    end
+end
+
+if inPanic then
+    while true do
+        coroutine.yield()
     end
 end

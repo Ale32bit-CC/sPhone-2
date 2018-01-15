@@ -29,6 +29,9 @@ end
 local nativeFS = deepCopy(_G.fs)
 
 _G.spk = {}
+local systemApps = {
+    "sphone.config"
+}
 
 function spk.launch(id,...)
     if type(id) ~= "string" then
@@ -117,6 +120,14 @@ function spk.install(path)
     local config = file.config
     local files = file.files
 
+    if not config or not files then
+        error("Invalid SPK file",2)
+    end
+
+    if not config.id then
+        error("Invalid SPK file",2)
+    end
+
     local function writeFile(patha,contenta) -- from Compress
         local file = fs.open(patha,"w")
         file.write(contenta)
@@ -134,5 +145,37 @@ function spk.install(path)
 
     writeDown(files,"/.sPhone/apps/"..config.id)
 
+    local f = fs.open("/.sPhone/apps/"..config.id.."/spk.cfg","w")
+    f.write(textutils.serialize(config))
+    f.close()
+
     return config.id
+end
+
+function spk.getInfo(id)
+    if type(id) ~= "string" then
+        error("bad argument (expected string, got "..type(id)..")",2)
+    end
+    if not fs.exists("/.sPhone/apps/"..id.."/spk.cfg") then
+        return nil
+    end
+    local f = fs.open("/.sPhone/apps/"..id.."/spk.cfg","r")
+    local config = textutils.unserialize(f.readAll())
+    f.close()
+    return {
+        id = id,
+        name= config.name or id,
+        author= config.author or "Unknown",
+        version= config.version or "1.0",
+        type= config.type or "generic",
+    }
+end
+
+function spk.canAlter(id)
+    for _,v in ipairs(systemApps) do
+        if id == v then
+            return false
+        end
+    end
+    return true
 end
