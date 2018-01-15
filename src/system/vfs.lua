@@ -15,5 +15,9 @@ local function deepCopy(table)
             end
         end
     end
+    return tab
 end
 local nativeFS = deepCopy(_G.fs)
+
+
+local newFS = {}

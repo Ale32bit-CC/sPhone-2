@@ -1,1 +1,1 @@
-dofile("/.sPhone/init.lua")
+dofile("/.sPhone/system/init.lua")

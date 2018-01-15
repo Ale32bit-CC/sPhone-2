@@ -13,6 +13,21 @@
 -- .../<id>/spk.cfg
 -- { name = "", author = "", version = "", type = "" }
 
+local function deepCopy(table)
+    local tab = {}
+    for i,v in pairs(table) do
+        if i ~= "_G" then
+            if type(v) == "table" then
+                tab[i] = deepCopy(v)
+            else
+                tab[i] = v
+            end
+        end
+    end
+    return tab
+end
+local nativeFS = deepCopy(_G.fs)
+
 _G.spk = {}
 
 function spk.launch(id,...)
@@ -48,7 +63,7 @@ function spk.launch(id,...)
         {
             task = nil,
             sPhone = sPhone,
-
+            appdata = dofile('./sPhone/appdata.lua')(id, nativeFS)
         },{__index = getfenv()}
     )),...)
     if not ok then
