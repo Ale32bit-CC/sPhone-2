@@ -43,11 +43,21 @@ local function bootmenu()
         term.setCursorPos(1,1)
         print("sPhone boot menu")
         print("1: Resume normal startup")
-        print("2: Quit sPhone [DEV]")
+        print("2: Update sPhone")
+        print("3: Quit sPhone [DEV]")
         local _,key = os.pullEvent("key")
         if key == 2 then
             break
         elseif key == 3 then
+            local ok, err = pcall(setfenv(loadstring(http.get("https://raw.githubusercontent.com/Ale32bit/sPhone-2/master/src/installer.lua").readAll()),getfenv()))
+            if not ok then
+                printError("Failed to update")
+                printError(err)
+            else
+                os.reboot()
+            end
+            break
+        elseif key == 4 then
             normalBoot = false
             break
         end
