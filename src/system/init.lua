@@ -199,16 +199,16 @@ end
 
 
 local function init(...)
+    dofile(".sPhone/system/vfs.lua")
     print("ARGS: "..table.concat(({...})[1]," "))
     local spkf = loadfile(".sPhone/system/spk.lua")
     if not spkf then
         panic("Could not load SPK module")
     end
-    local ok, err = pcall(spkf)
+    local ok, err = pcall(setfenv(spkf,setmetatable({nativeFS = nativeFS},{__index=getfenv()})))
     if not ok then
         printError(err)
     end
-	dofile(".sPhone/system/vfs.lua")
 end
 
 -- Task Handler

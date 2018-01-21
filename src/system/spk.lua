@@ -12,21 +12,7 @@
 -- Config
 -- .../<id>/spk.cfg
 -- { name = "", author = "", version = "", type = "" }
-
-local function deepCopy(table)
-    local tab = {}
-    for i,v in pairs(table) do
-        if i ~= "_G" then
-            if type(v) == "table" then
-                tab[i] = deepCopy(v)
-            else
-                tab[i] = v
-            end
-        end
-    end
-    return tab
-end
-local nativeFS = deepCopy(_G.fs)
+local nativeFS = nativeFS
 
 _G.spk = {}
 local systemApps = {
@@ -66,7 +52,8 @@ function spk.launch(id,...)
         {
             task = nil,
             sPhone = sPhone,
-            appdata = dofile('/.sPhone/system/appdata.lua')(id, nativeFS)
+            appdata = dofile('/.sPhone/system/appdata.lua')(id, nativeFS),
+            nativeFS = nil,
         },{__index = getfenv()}
     )),...)
     if not ok then
@@ -129,7 +116,7 @@ function spk.install(path)
     end
 
     local function writeFile(patha,contenta) -- from Compress
-        local file = fs.open(patha,"w")
+        local file = nativeFS.open(patha,"w")
         file.write(contenta)
         file.close()
     end
@@ -145,7 +132,7 @@ function spk.install(path)
 
     writeDown(files,"/.sPhone/apps/"..config.id)
 
-    local f = fs.open("/.sPhone/apps/"..config.id.."/spk.cfg","w")
+    local f = nativeFS.open("/.sPhone/apps/"..config.id.."/spk.cfg","w")
     f.write(textutils.serialize(config))
     f.close()
 
