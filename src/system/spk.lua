@@ -136,7 +136,7 @@ function spk.install(path)
     f.write(textutils.serialize(config))
     f.close()
 
-    fs.makeDir("/.sPhone/appdata/"..config.id)
+    nativeFS.makeDir("/.sPhone/appdata/"..config.id)
 
     return config.id
 end

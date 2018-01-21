@@ -8,35 +8,35 @@ return function(app, nativeFS)
     local obj = {}
     obj.db = {}
     if not fs.exists('/.sPhone/appdata') then
-        fs.makeDir('/.sPhone/appdata')
+        nativeFS.makeDir('/.sPhone/appdata')
     end
     if not fs.exists('/.sPhone/appdata/' .. app) then
-        fs.makeDir('/.sPhone/appdata/' .. app)
+        nativeFS.makeDir('/.sPhone/appdata/' .. app)
     end
     if not fs.exists('/.sPhone/appdata/' .. app .. '/files') then
-        fs.makeDir('/.sPhone/appdata/' .. app .. '/files')
+        nativeFS.makeDir('/.sPhone/appdata/' .. app .. '/files')
     end
     if not fs.exists('/.sPhone/appdata/' .. app .. '/database.tab') then
-        local handle = fs.open('/.sPhone/appdata/' .. app .. '/database.tab','w')
+        local handle = nativeFS.open('/.sPhone/appdata/' .. app .. '/database.tab','w')
         handle.write('{}')
         handle.close()
     end
-    local handle = fs.open('/.sPhone/appdata/' .. app .. '/database.tab','r')
+    local handle = nativeFS.open('/.sPhone/appdata/' .. app .. '/database.tab','r')
     local db = textutils.unserialise(handle.readAll())
     handle.close()
     function obj.getFile(file)
         local actualDir = '/.sPhone/appdata/' .. app .. '/files/' .. string.gsub(file, '/','%%')
-        if not fs.exists(actualDir) then
+        if not nativeFS.exists(actualDir) then
             error("Invalid file!", 2)
         end
-        local handle = fs.open(actualDir,'r')
+        local handle = nativeFS.open(actualDir,'r')
         local data = handle.readAll()
         handle.close()
         return data
     end
     function obj.writeFile(file, data)
         local actualDir = '/.sPhone/appdata/' .. app .. '/files/' .. string.gsub(file, '/','%%')
-        local handle = fs.open(actualDir,'w')
+        local handle = nativeFS.open(actualDir,'w')
         handle.write(data)
         handle.close()
         return true
@@ -54,7 +54,7 @@ return function(app, nativeFS)
     end
     function obj.db.set(key, value)
         db[key] = value
-        local handle = fs.open('/.sPhone/appdata/' .. app .. '/database.tab','w')
+        local handle = nativeFS.open('/.sPhone/appdata/' .. app .. '/database.tab','w')
         handle.write(textutils.serialise(db))
         handle.close()
     end
