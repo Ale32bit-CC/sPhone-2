@@ -66,7 +66,7 @@ function spk.launch(id,...)
         {
             task = nil,
             sPhone = sPhone,
-            appdata = dofile('./sPhone/appdata.lua')(id, nativeFS)
+            appdata = dofile('/.sPhone/system/appdata.lua')(id, nativeFS)
         },{__index = getfenv()}
     )),...)
     if not ok then
