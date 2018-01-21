@@ -25,7 +25,7 @@ return function(app, nativeFS)
     local db = textutils.unserialise(handle.readAll())
     handle.close()
     function obj.getFile(file)
-        local actualDir = '/.sPhone/appdata/' .. app .. '/files/' .. string.gsub(file, '/','%')
+        local actualDir = '/.sPhone/appdata/' .. app .. '/files/' .. string.gsub(file, '/','%%')
         if not fs.exists(actualDir) then
             error("Invalid file!", 2)
         end
@@ -35,14 +35,14 @@ return function(app, nativeFS)
         return data
     end
     function obj.writeFile(file, data)
-        local actualDir = '/.sPhone/appdata/' .. app .. '/files/' .. string.gsub(file, '/','%')
+        local actualDir = '/.sPhone/appdata/' .. app .. '/files/' .. string.gsub(file, '/','%%')
         local handle = fs.open(actualDir,'w')
         handle.write(data)
         handle.close()
         return true
     end
     function obj.exists(file)
-        local actualDir = '/.sPhone/appdata/' .. app .. '/files/' .. string.gsub(file, '/','%')
+        local actualDir = '/.sPhone/appdata/' .. app .. '/files/' .. string.gsub(file, '/','%%')
         return fs.exists(actualDir)
     end
     function obj.db.get(key, default)
