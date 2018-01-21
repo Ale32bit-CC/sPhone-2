@@ -1,8 +1,12 @@
 --[[
 -- sPhone 2.0 for ComputerCraft
--- Copyright (c) 2018 Ale32bit
+-- Copyright (c) 2018 Ale32bit & Rph
 -- LICENSE: GNU GPLv3 (https://github.com/Ale32bit/sPhone-2/blob/master/LICENSE)
 ]]--
+
+if sPhone then
+    return
+end
 
 -- Make a FS copy before we fuck it up
 local function deepCopy(table)
@@ -88,7 +92,7 @@ term.setCursorPos(1,math.ceil(h/2+#logo/2))
 center("sPhone 2")
 
 term.setCursorPos(1,1)
-write("Copyright (c) 2018 Ale32bit, Rph")
+write("Copyright (c) 2018 Ale32bit & Rph")
 
 local timeout = os.startTimer(2.5)
 while true do
@@ -194,7 +198,7 @@ local function init(...)
     if not ok then
         printError(err)
     end
-
+	dofile(".sPhone/system/vfs.lua")
 end
 
 -- Task Handler
