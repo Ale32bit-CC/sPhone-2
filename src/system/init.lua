@@ -139,15 +139,7 @@ local function panic(reason)
   term.clear()
   term.setCursorPos(1,1)
   print("sPhone crashed")
-  if not reason then
-      print("Unknown reason")
-  elseif reason and not debug then
-      print(reason)
-  elseif reason and debug then
-      print(debug.traceback(reason))
-  else -- just in case
-      print(reason)
-  end
+  print(reason or "Unknown reason")
 end
 
 _G.sPhone = {
@@ -164,10 +156,16 @@ function sPhone.require(lib)
     end
     if fs.exists("/.sPhone/system/libs/"..fs.getName(lib)) and not fs.isDir("/.sPhone/system/libs/"..fs.getName(lib)) then
         lib = "/.sPhone/system/libs/"..fs.getName(lib)
+    elseif fs.exists("/.sPhone/system/libs/"..fs.getName(lib)..".lua") and not fs.isDir("/.sPhone/system/libs/"..fs.getName(lib)) then
+        lib = "/.sPhone/system/libs/"..fs.getName(lib)..".lua"
     elseif fs.exists("/rom/apis/"..fs.getName(lib)) and not fs.isDir("/rom/apis/"..fs.getName(lib)) then
         lib = "/rom/apis/"..fs.getName(lib)
+    elseif fs.exists("/rom/apis/"..fs.getName(lib))..".lua" and not fs.isDir("/rom/apis/"..fs.getName(lib)) then
+        lib = "/rom/apis/"..fs.getName(lib)..".lua"
     elseif fs.exists(lib) then
         lib = lib --?
+    elseif fs.exists(lib..".lua") then
+        lib = lib..".lua" --?
     elseif getfenv()[lib] then
         return getfenv()[lib]
     end
@@ -200,7 +198,6 @@ end
 
 local function init(...)
     dofile(".sPhone/system/vfs.lua")
-    print("ARGS: "..table.concat(({...})[1]," "))
     local spkf = loadfile(".sPhone/system/spk.lua")
     if not spkf then
         panic("Could not load SPK module")
@@ -209,6 +206,17 @@ local function init(...)
     if not ok then
         printError(err)
     end
+    if not fs.exists("/.sPhone/config/sPhone") then
+        local ok, err = pcall(setfenv(loadfile("/.sPhone/system/setup.lua"),setmetatable({fs = nativeFS},{__index=getfenv()})))
+        if not ok then
+            panic(err)
+        end
+    end
+    if not spk.exists("dan200.shell") then
+        panic("Could not find home")
+    end
+
+    spk.launch("dan200.shell")
 end
 
 -- Task Handler
@@ -279,3 +287,5 @@ if inPanic then
         coroutine.yield()
     end
 end
+
+_G.term = nil

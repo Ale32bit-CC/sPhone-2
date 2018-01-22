@@ -11,7 +11,15 @@ local files = {
     [".sPhone/system/vfs.lua"] = "system/vfs.lua",
     [".sPhone/system/spk.lua"] = "system/spk.lua",
     [".sPhone/system/appdata.lua"] = "system/appdata.lua",
+    [".sPhone/system/setup.lua"] = "system/setup.lua",
+
+    [".sPhone/libs/sha256.lua"] = "libs/sha256.lua",
+
     [".sPhone/sdk/build.lua"] = "sdk/build.lua",
+
+
+    [".sPhone/installer/spks/dan200.shell.spk"] = "installer/spks/dan200.shell.spk",
+
     ["startup"] = "startup.lua"
 }
 
