@@ -107,4 +107,6 @@ f.close()
 
 slow(h-1,"sPhone is now ready!")
 
+sleep(2)
+
 os.pullEvent = oldp
