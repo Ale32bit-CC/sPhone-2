@@ -12,6 +12,7 @@ local files = {
     [".sPhone/system/spk.lua"] = "system/spk.lua",
     [".sPhone/system/appdata.lua"] = "system/appdata.lua",
     [".sPhone/system/setup.lua"] = "system/setup.lua",
+    [".sPhone/system/utils.lua"] = "system/utils.lua",
 
     [".sPhone/system/libs/sha256.lua"] = "system/libs/sha256.lua",
 

@@ -198,6 +198,7 @@ end
 
 local function init(...)
     dofile(".sPhone/system/vfs.lua")
+    dofile(".sPhone/system/utils.lua")
     local spkf = loadfile(".sPhone/system/spk.lua")
     if not spkf then
         panic("Could not load SPK module")

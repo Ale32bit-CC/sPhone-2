@@ -480,11 +480,6 @@ else\
     print( os.version() )\
     term.setTextColour( textColour )\
 \
-    -- Run the startup program\
-    if parentShell == nil then\
-        shell.run( \"/rom/startup.lua\" )\
-    end\
-\
     -- Read commands and execute them\
     local tCommandHistory = {}\
     while not bExit do\
