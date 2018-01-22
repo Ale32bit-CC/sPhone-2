@@ -75,7 +75,7 @@ function _G.read( _sReplaceChar, _tHistory, _fnComplete, _sDefault )
             local oldText, oldBg
             if not _bClear then
                 oldText = term.getTextColor()
-                term.setTextColor( colors.lightGray )
+                term.setTextColor( colors.gray )
             end
             if sReplace then
                 term.write( string.rep( sReplace, string.len( sCompletion ) ) )
