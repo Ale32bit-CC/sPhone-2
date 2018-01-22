@@ -19,7 +19,7 @@ local files = {
     [".sPhone/sdk/build.lua"] = "sdk/build.lua",
 
 
-    [".sPhone/installer/spks/dan200.shell.spk"] = "installer/spks/dan200.shell.spk",
+    [".sPhone/installer/spks/sPhone.shell.spk"] = "installer/spks/sPhone.shell.spk",
 
     ["startup"] = "startup.lua"
 }

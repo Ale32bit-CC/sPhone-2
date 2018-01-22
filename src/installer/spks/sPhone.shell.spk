@@ -1,0 +1,42 @@
+{
+  files = {
+    [ "main.lua" ] = "local parentTerm = term.current()\
+-- \"shell\"\
+-- Print the header\
+term.setBackgroundColor( colors.black )\
+term.setTextColour( colors.yellow )\
+print( os.version() )\
+term.setTextColour( colors.white )\
+\
+-- Read commands and execute them\
+local tCommandHistory = {}\
+while not bExit do\
+	term.redirect( parentTerm )\
+	term.setBackgroundColor( colors.black )\
+	term.setTextColour( colors.yellow )\
+	write( shell.dir() .. \"> \" )\
+	term.setTextColour( colors.white )\
+\
+\
+	local sLine\
+	if settings.get( \"shell.autocomplete\" ) then\
+		sLine = read( nil, tCommandHistory, shell.complete )\
+	else\
+		sLine = read( nil, tCommandHistory )\
+	end\
+	if sLine:match(\"%S\") and tCommandHistory[#tCommandHistory] ~= sLine then\
+		table.insert( tCommandHistory, sLine )\
+	end\
+	shell.run( sLine )\
+end",
+  },
+  config = {
+    builderVersion = "2.0",
+    type = "generic",
+    name = "Shell",
+    id = "sPhone.shell",
+    author = "Ale32bit, Rph",
+    builder = "sPhone SPK Builder",
+    version = "1.0",
+  },
+}

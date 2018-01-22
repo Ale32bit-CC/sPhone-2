@@ -213,14 +213,14 @@ local function init(...)
             panic(err)
         end
     end
-    if not spk.exists("dan200.shell") then
+    if not spk.exists("sPhone.shell") then
         panic("Could not find home")
     end
     term.setBackgroundColor(colors.black)
     term.setTextColor(colors.white)
     term.clear()
     term.setCursorPos(1,1)
-    spk.launch("dan200.shell")
+    spk.launch("sPhone.shell")
 end
 
 -- Task Handler
