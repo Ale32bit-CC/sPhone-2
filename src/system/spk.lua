@@ -120,7 +120,7 @@ function spk.install(path)
         file.write(contenta)
         file.close()
     end
-    function writeDown(inputa,dira)
+    local function writeDown(inputa,dira)
         for i,v in pairs(inputa) do
             if type(v) == "table" then
                 writeDown(v,dira.."/"..i)

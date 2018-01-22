@@ -28,7 +28,7 @@ end
 local function explore(dir)
     local buffer = {}
     local sBuffer = fs.list(dir)
-    for i,v in pairs(sBuffer) do
+    for _,v in pairs(sBuffer) do
         if fs.isDir(dir.."/"..v) then
             if v ~= ".git" then
                 buffer[v] = explore(dir.."/"..v)
