@@ -1,0 +1,136 @@
+{
+  files = {
+    [ "main.lua" ] = "--[[\
+-- sPhone 2.0 for ComputerCraft\
+-- Copyright (c) 2018 Ale32bit & Rph\
+-- LICENSE: GNU GPLv3 (https://github.com/Ale32bit/sPhone-2/blob/master/LICENSE)\
+]]--\
+\
+local w,h = term.getSize()\
+local defaultIcon = {{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1}}\
+local appPos = { -- 12 apps per page\
+	{2,2}, {8,2}, {15,2}, {21,2}, -- first row\
+	\
+	{2,8}, {8,8}, {15,8}, {21,8}, -- second row\
+	\
+	{2,14}, {8,14}, {15,14}, {21,14}, -- third row\
+}\
+local appPage = 1\
+local totalPages = math.ceil(#spk.list()/#appPos)\
+local apps = {}\
+local current = {}\
+local hide = {\
+	[\"sPhone.home\"] = true, -- true value to help better management\
+}\
+\
+local primaryApps = {\
+	[\"sPhone.shell\"] = true, -- true value to help better management\
+}\
+\
+for k,v in pairs(primaryApps) do\
+	table.insert(apps,k)\
+end\
+\
+for _,v in ipairs(spk.list()) do\
+	if not hide[v] and not primaryApps[v] then\
+		table.insert(apps,v)\
+	end\
+end\
+\
+local function recalcApps()\
+	current = {}\
+	for i = ((appPage*12)-12)+1, 12*appPage do\
+		table.insert(current, apps[i])\
+	end\
+end\
+\
+local function redraw()\
+	term.setCursorBlink(false)\
+	term.setBackgroundColor(colors.lightBlue)\
+	term.clear()\
+	term.setTextColor(colors.white)\
+	term.setCursorPos(math.ceil(w/2)-1,h)\
+	term.write(\"====\")\
+	term.setCursorPos(math.ceil(w/2)-4,h)\
+	if appPage > 1 then\
+		term.write(\"<\")\
+	end\
+	term.setCursorPos(math.ceil(w/2)+5,h)\
+	if appPage < totalPages then\
+		term.write(\">\")\
+	end\
+	\
+	term.setCursorPos(w,h)\
+	term.setTextColor(colors.white)\
+	term.write(appPage)\
+\
+	for i = 1,#current do\
+		local x,y = unpack(appPos[i])\
+		local icon = spk.getInfo(current[i]).icon or defaultIcon\
+		paintutils.drawImage(icon,x,y)\
+		term.setBackgroundColor(colors.lightBlue)\
+		term.setTextColor(colors.blue)\
+		term.setCursorPos(x,y+4)\
+		term.write(spk.getInfo(current[i]).name or spk.getInfo(current[i]).id)\
+	end\
+end\
+\
+local function getAppPos(x,y)\
+	for i = 1,#appPos do\
+		if x >= appPos[i][1] and x <= appPos[i][1]+4 and y >= appPos[i][2] and y <= appPos[i][2]+4 then\
+			return i\
+		end\
+	end\
+	return nil\
+end\
+\
+recalcApps()\
+redraw()\
+\
+while true do\
+	local ev = {os.pullEvent()}\
+	if ev[1] == \"mouse_click\" then\
+		local x,y = ev[3],ev[4]\
+		local clickedApp = getAppPos(x,y)\
+		if clickedApp then\
+			if current[clickedApp] then\
+				local appInfo = spk.getInfo(current[clickedApp])\
+				spk.launch(appInfo.id)\
+				redraw()\
+			end\
+		else\
+			if y == h then\
+				if x == math.ceil(w/2)-4 and appPage > 1 then\
+					appPage = appPage - 1\
+					recalcApps()\
+					if #current == 0 then\
+						appPage = appPage + 1\
+						recalcApps()\
+					end\
+					redraw()\
+				elseif x == math.ceil(w/2)+5 and appPage < totalPages then\
+					appPage = appPage + 1\
+					recalcApps()\
+					if #current == 0 then\
+						appPage = appPage - 1\
+						recalcApps()\
+					end\
+					redraw()\
+				elseif x >= math.ceil(w/2)-1 and x <= math.ceil(w/2)+2 then\
+					break\
+				end\
+			end\
+		end\
+	end\
+end",
+  },
+  config = {
+    builderVersion = "2.0",
+    type = "generic",
+    name = "Home",
+    id = "sPhone.home",
+    author = "sPhone",
+    builder = "sPhone SPK Builder",
+    version = "0.1",
+  },
+}

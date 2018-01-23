@@ -20,6 +20,7 @@ local files = {
 
 
     [".sPhone/installer/spks/sPhone.shell.spk"] = "installer/spks/sPhone.shell.spk",
+    [".sPhone/installer/spks/sPhone.home.spk"] = "installer/spks/sPhone.home.spk",
 
     ["startup"] = "startup.lua"
 }

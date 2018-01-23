@@ -223,14 +223,14 @@ local function init(...)
         panic("Invalid configuration") -- Just don't do anything more, it's safer this way, anyway this should never happen normally
     end
     sPhone.username = config.username or "User"
-    if not spk.exists("sPhone.shell") then
+    if not spk.exists("sPhone.home") then
         panic("Could not find home")
     end
     term.setBackgroundColor(colors.black)
     term.setTextColor(colors.white)
     term.clear()
     term.setCursorPos(1,1)
-    spk.launch("sPhone.shell")
+    spk.launch("sPhone.home")
 end
 
 -- Task Handler
