@@ -16,7 +16,7 @@ local nativeFS = nativeFS
 
 _G.spk = {}
 local systemApps = {
-    "sphone.config"
+    "sPhone.shell"
 }
 
 function spk.launch(id,...)
@@ -113,6 +113,23 @@ function spk.install(path)
 
     if not config.id then
         error("Invalid SPK file",2)
+    end
+
+    local setupCheck = false
+    if fs.exists("/.sPhone/config/setupMode") and not fs.isDir("/.sPhone/config/setupMode") then
+        local f = fs.open("/.sPhone/config/setupMode","r")
+        if f.readLine() == "true" then
+            setupCheck = true
+        end
+        f.close()
+    end
+
+    if not setupCheck then
+        for _,v in ipairs(systemApps) do
+            if config.id == v then
+                error("Cannot alter system SPK")
+            end
+        end
     end
 
     local function writeFile(patha,contenta) -- from Compress

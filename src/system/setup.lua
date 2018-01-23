@@ -36,6 +36,10 @@ local function slow(y,...)
     end
 end
 
+local f = fs.open("/.sPhone/config/setupMode","w")
+f.write("true")
+f.close()
+
 term.setBackgroundColor(colors.black)
 term.clear()
 sleep(0.59)
@@ -104,6 +108,7 @@ f.write(textutils.serialize({
     password = sha256(password),
 }))
 f.close()
+fs.delete("/.sPhone/config/setupMode")
 
 slow(h-1,"sPhone is now ready!")
 
