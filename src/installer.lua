@@ -27,6 +27,10 @@ local files = {
 
 local base = "https://raw.githubusercontent.com/Ale32bit/sPhone-2/master/src/"
 
+if fs.isReadOnly("/.sPhone") then
+    error("Cannot update while sPhone is running!",0)
+end
+
 print("Installing sPhone 2...")
 
 for path,url in pairs(files) do
@@ -42,5 +46,9 @@ for path,url in pairs(files) do
         printError("Could not fetch "..base..url)
     end
 end
+
+local f = fs.open("/.sPhone/config/uptodate","w")
+f.write("true")
+f.close()
 
 print("sPhone 2 installed")

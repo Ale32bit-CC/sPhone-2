@@ -216,6 +216,12 @@ local function init(...)
             panic(err)
         end
     end
+    if fs.exists("/.sPhone/config/uptodate") then
+        for _,v in ipairs(fs.list("/.sPhone/installer/spks")) do
+            spk.install("/.sPhone/installer/spks/"..v)
+        end
+        nativeFS.delete("/.sPhone/config/uptodate")
+    end
     local f = fs.open("/.sPhone/config/sPhone","r")
     local config = textutils.unserialize(f.readAll())
     f.close()
