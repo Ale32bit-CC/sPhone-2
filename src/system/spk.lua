@@ -66,7 +66,7 @@ end
 function spk.list()
     local l = {}
     for _,v in ipairs(fs.list("/.sPhone/apps")) do
-        if not fs.isDir("/.sPhone/apps/"..v) then
+        if fs.isDir("/.sPhone/apps/"..v) then
             table.insert(l,v)
         end
     end
