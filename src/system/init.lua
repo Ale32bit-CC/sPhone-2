@@ -207,12 +207,22 @@ local function init(...)
     if not ok then
         printError(err)
     end
+    if fs.isDir("/.sPhone/config/sPhone") then
+        nativeFS.delete("/.sPhone/config/sPhone")
+    end
     if not fs.exists("/.sPhone/config/sPhone") then
         local ok, err = pcall(setfenv(loadfile("/.sPhone/system/setup.lua"),setmetatable({fs = nativeFS},{__index=getfenv()})))
         if not ok then
             panic(err)
         end
     end
+    local f = fs.open("/.sPhone/config/sPhone","r")
+    local config = textutils.unserialize(f.readAll())
+    f.close()
+    if not config then
+        panic("Invalid configuration") -- Just don't do anything more, it's safer this way, anyway this should never happen normally
+    end
+    sPhone.username = config.username or "User"
     if not spk.exists("sPhone.shell") then
         panic("Could not find home")
     end
