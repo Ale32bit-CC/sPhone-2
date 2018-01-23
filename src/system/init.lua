@@ -217,7 +217,7 @@ local function init(...)
         end
     end
     if fs.exists("/.sPhone/config/uptodate") then
-        local f = fs.open("/.sPhone/config/setupMode","w")
+        local f = nativeFS.open("/.sPhone/config/setupMode","w")
         f.write("true")
         f.close()
         for _,v in ipairs(fs.list("/.sPhone/installer/spks")) do
