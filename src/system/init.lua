@@ -197,6 +197,11 @@ end
 
 
 local function init(...)
+    if debug and debug.getupvalue then
+        _G.debug.getupvalue = function()
+            return nil
+        end
+    end
     dofile(".sPhone/system/vfs.lua")
     dofile(".sPhone/system/utils.lua")
     local spkf = loadfile(".sPhone/system/spk.lua")
