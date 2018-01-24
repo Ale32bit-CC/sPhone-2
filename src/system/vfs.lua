@@ -53,6 +53,9 @@ _G.fs.open = function(path,mode)
         if mode:sub(1,1) == "w" or mode:sub(1,1) == "a" then
             return nil
         end
+        if mode == "r" and fs.combine("",path) == ".sPhone/config/sPhone" then
+            return nil, "Access denied"
+        end
     end
     return nativeFS.open(path,mode)
 end

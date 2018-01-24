@@ -226,13 +226,17 @@ local function init(...)
         nativeFS.delete("/.sPhone/config/uptodate")
         nativeFS.delete("/.sPhone/config/setupMode")
     end
-    local f = fs.open("/.sPhone/config/sPhone","r")
+    local f = nativeFS.open("/.sPhone/config/sPhone","r")
     local config = textutils.unserialize(f.readAll())
     f.close()
     if not config then
         panic("Invalid configuration") -- Just don't do anything more, it's safer this way, anyway this should never happen normally
     end
     sPhone.username = config.username or "User"
+    local ok, err = pcall(setfenv(loadfile(".sPhone/system/lock.lua"),setmetatable({fs = nativeFS},{__index=getfenv()})))
+    if not ok then
+        panic(err)
+    end
     if not spk.exists("sPhone.home") then
         panic("Could not find home")
     end
