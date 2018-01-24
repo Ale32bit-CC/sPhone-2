@@ -1,6 +1,11 @@
 {
   files = {
     [ "main.lua" ] = "local parentTerm = term.current()\
+local bExit = false\
+\
+function shell.exit()\
+	bExit = true\
+end\
 -- \"shell\"\
 -- Print the header\
 term.setBackgroundColor( colors.black )\
@@ -35,7 +40,7 @@ end",
     type = "generic",
     name = "Shell",
     id = "sPhone.shell",
-    author = "Ale32bit, Rph",
+    author = "sPhone",
     builder = "sPhone SPK Builder",
     version = "1.0",
   },

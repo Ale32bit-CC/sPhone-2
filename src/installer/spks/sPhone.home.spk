@@ -7,12 +7,10 @@
 ]]--\
 \
 local w,h = term.getSize()\
-local defaultIcon = {{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1}}\
+local defaultIcon = {{16,32768,32768,32768,32768},{32768,16,32768,32768,32768},{16,32768,32768,16,16},{32768,32768,32768,32768,32768}}\
 local appPos = { -- 12 apps per page\
 	{2,2}, {8,2}, {15,2}, {21,2}, -- first row\
-	\
 	{2,8}, {8,8}, {15,8}, {21,8}, -- second row\
-	\
 	{2,14}, {8,14}, {15,14}, {21,14}, -- third row\
 }\
 local appPage = 1\
@@ -20,11 +18,11 @@ local totalPages = math.ceil(#spk.list()/#appPos)\
 local apps = {}\
 local current = {}\
 local hide = {\
-	[\"sPhone.home\"] = true, -- true value to help better management\
+	[\"sPhone.home\"] = true, -- true value because i'm too lazy to make an useless for loop\
 }\
 \
 local primaryApps = {\
-	[\"sPhone.shell\"] = true, -- true value to help better management\
+	[\"sPhone.shell\"] = true, -- true value because i'm too lazy to make an useless for loop\
 }\
 \
 for k,v in pairs(primaryApps) do\
@@ -44,11 +42,78 @@ local function recalcApps()\
 	end\
 end\
 \
+local function sanitizeIcon(icon)\
+	local out = {}\
+	for y = 1,4 do\
+		out[y] = {}\
+		for x = 1,5 do\
+			if icon[y] and icon[y][x] then\
+				out[y][x] = icon[y][x]\
+			end\
+		end\
+	end\
+	return out\
+end\
+\
+local function bottomMenu()\
+	local menu = {\
+		{\"Reboot\",function()\
+			os.reboot()\
+		end},\
+		{\"Shutdown\", function()\
+			os.shutdown()\
+		end},\
+		{\"Shell\",function()\
+			spk.launch(\"sPhone.shell\")\
+		end},\
+		{\"Settings\",function()\
+			spk.launch(\"sPhone.settings\")\
+		end},\
+	}\
+	local w,h = term.getSize()\
+	term.setBackgroundColor(colors.blue)\
+	term.setTextColor(colors.white)\
+	term.clear()\
+	term.setCursorPos(2,1)\
+	print(sPhone.username or \"User\")\
+	term.setCursorPos(2,3)\
+	print(\"Home Menu\")\
+	term.setCursorPos(2,5)\
+	for k,v in ipairs(menu) do\
+		local _,y = term.getCursorPos()\
+		term.setCursorPos(2,y)\
+		if k % 2 == 0 then\
+			term.setBackgroundColor(colors.white)\
+			term.setTextColor(colors.lightBlue)\
+		else\
+			term.setBackgroundColor(colors.lightBlue)\
+			term.setTextColor(colors.white)\
+		end\
+		term.clearLine()\
+		print(v[1])\
+	end\
+	term.setBackgroundColor(colors.blue)\
+	term.setTextColor(colors.lightBlue)\
+	term.setCursorPos(math.ceil(w/2)-1,h)\
+	term.write(\"\\31\\31\\31\\31\")\
+	\
+	while true do\
+		local ev = {os.pullEvent()}\
+		if ev[1] == \"mouse_up\" then\
+			if menu[ev[4]-4] then\
+				menu[ev[4]-4][2]()\
+			elseif ev[4] == h and ev[3] >= math.ceil(w/2)-1 and ev[3] <= math.ceil(w/2)+2 then\
+				break\
+			end\
+		end\
+	end\
+end\
+\
 local function redraw()\
 	term.setCursorBlink(false)\
 	term.setBackgroundColor(colors.lightBlue)\
 	term.clear()\
-	term.setTextColor(colors.white)\
+	term.setTextColor(colors.blue)\
 	term.setCursorPos(math.ceil(w/2)-1,h)\
 	term.write(\"====\")\
 	term.setCursorPos(math.ceil(w/2)-4,h)\
@@ -66,10 +131,10 @@ local function redraw()\
 \
 	for i = 1,#current do\
 		local x,y = unpack(appPos[i])\
-		local icon = spk.getInfo(current[i]).icon or defaultIcon\
+		local icon = sanitizeIcon(spk.getInfo(current[i]).icon or defaultIcon)\
 		paintutils.drawImage(icon,x,y)\
 		term.setBackgroundColor(colors.lightBlue)\
-		term.setTextColor(colors.blue)\
+		term.setTextColor(colors.gray)\
 		term.setCursorPos(x,y+4)\
 		term.write(spk.getInfo(current[i]).name or spk.getInfo(current[i]).id)\
 	end\
@@ -84,43 +149,69 @@ local function getAppPos(x,y)\
 	return nil\
 end\
 \
+local function swipeRight()\
+	appPage = appPage - 1\
+	recalcApps()\
+	if #current == 0 then\
+		appPage = appPage + 1\
+		recalcApps()\
+	end\
+	redraw()\
+end\
+\
+local function swipeLeft()\
+	appPage = appPage + 1\
+	recalcApps()\
+	if #current == 0 then\
+		appPage = appPage - 1\
+		recalcApps()\
+	end\
+	redraw()\
+end\
+\
 recalcApps()\
 redraw()\
 \
+--local dragX = nil\
+\
 while true do\
 	local ev = {os.pullEvent()}\
-	if ev[1] == \"mouse_click\" then\
+	if ev[1] == \"mouse_up\" then\
 		local x,y = ev[3],ev[4]\
 		local clickedApp = getAppPos(x,y)\
 		if clickedApp then\
 			if current[clickedApp] then\
 				local appInfo = spk.getInfo(current[clickedApp])\
+				term.setBackgroundColor(colors.black)\
+				term.setTextColor(colors.white)\
+				term.clear()\
+				term.setCursorPos(1,1)\
 				spk.launch(appInfo.id)\
 				redraw()\
 			end\
 		else\
 			if y == h then\
 				if x == math.ceil(w/2)-4 and appPage > 1 then\
-					appPage = appPage - 1\
-					recalcApps()\
-					if #current == 0 then\
-						appPage = appPage + 1\
-						recalcApps()\
-					end\
-					redraw()\
+					swipeRight()\
 				elseif x == math.ceil(w/2)+5 and appPage < totalPages then\
-					appPage = appPage + 1\
-					recalcApps()\
-					if #current == 0 then\
-						appPage = appPage - 1\
-						recalcApps()\
-					end\
-					redraw()\
+					swipeLeft()\
 				elseif x >= math.ceil(w/2)-1 and x <= math.ceil(w/2)+2 then\
-					break\
+					bottomMenu()\
+					redraw()\
 				end\
 			end\
 		end\
+	elseif ev[1] == \"mouse_drag\" then\
+		--[[\
+		if dragX then\
+			if ev[3] > dragX then\
+				swipeRight()\
+			elseif ev[3] < dragX then\
+				swipeLeft()\
+			end\
+		end\
+		dragX = ev[3]\
+		]]\
 	end\
 end",
   },
