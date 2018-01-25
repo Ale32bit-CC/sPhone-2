@@ -12,11 +12,22 @@
 -- Config
 -- .../<id>/spk.cfg
 -- { name = "", author = "", version = "", type = "" }
+
+if spk then
+    return
+end
+
 local nativeFS = nativeFS
 
 _G.spk = {}
 local systemApps = {
-    "sPhone.shell"
+    "sPhone.shell",
+    "sPhone.home",
+    "sPhone.accountCreator",
+}
+
+local VBApps = {
+    "sPhone.accountCreator",
 }
 
 function spk.launch(id,...)
@@ -48,12 +59,26 @@ function spk.launch(id,...)
     if not main then
         error("Could not load SPK",2)
     end
+
+    local aFS = fs
+
+    for _,v in ipairs(systemApps) do
+        if id == v then
+            for _,b in ipairs(VBApps) do
+                if id == b then
+                    aFS = nativeFS
+                end
+            end
+        end
+    end
+
     local ok, err = pcall(setfenv(main,setmetatable(
         {
             task = nil,
             sPhone = sPhone,
             appdata = dofile('/.sPhone/system/appdata.lua')(id, nativeFS),
             nativeFS = nil,
+            fs = aFS,
         },{__index = getfenv()}
     )),...)
     if not ok then
