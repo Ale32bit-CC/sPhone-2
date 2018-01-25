@@ -17,8 +17,6 @@ if spk then
     return
 end
 
-local nativeFS = nativeFS
-
 _G.spk = {}
 local systemApps = {
     "sPhone.shell",
@@ -60,26 +58,26 @@ function spk.launch(id,...)
         error("Could not load SPK",2)
     end
 
-    local aFS = fs
+    local _tENV = {
+        task = nil,
+        sPhone = sPhone,
+        appdata = dofile('/.sPhone/system/appdata.lua')(id, nativeFS),
+        nativeFS = nil,
+    }
 
     for _,v in ipairs(systemApps) do
         if id == v then
             for _,b in ipairs(VBApps) do
                 if id == b then
-                    aFS = nativeFS
+                    _tENV.fs = nativeFS
+                    _tENV.task = task
                 end
             end
         end
     end
 
     local ok, err = pcall(setfenv(main,setmetatable(
-        {
-            task = nil,
-            sPhone = sPhone,
-            appdata = dofile('/.sPhone/system/appdata.lua')(id, nativeFS),
-            nativeFS = nil,
-            fs = aFS,
-        },{__index = getfenv()}
+        _tENV,{__index = getfenv()}
     )),...)
     if not ok then
         printError(err)

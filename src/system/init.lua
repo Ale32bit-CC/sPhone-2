@@ -290,7 +290,7 @@ task.add(function() -- OS
     if not ok then
         panic(err)
     end
-end)
+end,"sPhone OS")
 
 os.queueEvent("multitask")
 
