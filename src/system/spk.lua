@@ -182,11 +182,11 @@ function spk.install(path)
 end
 
 function spk.uninstall(id)
-    if type(path) ~= "string" then
-        error("bad argument (expected string, got "..type(path)..")",2)
+    if type(id) ~= "string" then
+        error("bad argument (expected string, got "..type(id)..")",2)
     end
 
-    if not fs.exists(".sPhone/apps/"..path) then
+    if not fs.exists(".sPhone/apps/"..id) then
         error("ID not found",2)
     end
 
