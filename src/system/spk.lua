@@ -181,6 +181,27 @@ function spk.install(path)
     return config.id
 end
 
+function spk.uninstall(id)
+    if type(path) ~= "string" then
+        error("bad argument (expected string, got "..type(path)..")",2)
+    end
+
+    if not fs.exists(".sPhone/apps/"..path) then
+        error("ID not found",2)
+    end
+
+    for _,v in ipairs(systemApps) do
+        if id == v then
+            error("Cannot uninstall system app",2)
+        end
+    end
+
+    nativeFS.delete("/.sPhone/apps/"..id)
+    nativeFS.delete("/.sPhone/appdata/"..id)
+
+    return true
+end
+
 function spk.getInfo(id)
     if type(id) ~= "string" then
         error("bad argument (expected string, got "..type(id)..")",2)
