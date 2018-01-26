@@ -13,6 +13,7 @@ os.pullEvent = os.pullEventRaw
 local sha256 = sPhone.require("sha256").sha256
 
 local w,h = term.getSize()
+local pw
 
 local center = function(txt)
     local _,y = term.getCursorPos()
@@ -98,14 +99,16 @@ if password == "" then
     term.setTextColor(colors.lightGray)
     print("None")
     term.setTextColor(colors.white)
+    pw = false
 else
     print(string.rep("*",#password))
+    pw = sha256(password)
 end
 
 local f = fs.open("/.sPhone/config/sPhone","w")
 f.write(textutils.serialize({
     username = username,
-    password = sha256(password),
+    password = pw,
 }))
 f.close()
 fs.delete("/.sPhone/config/setupMode")
