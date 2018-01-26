@@ -64,6 +64,7 @@ config.name = config.name or config.id
 config.author = config.author or "Unknown"
 config.version = config.version or "1.0"
 config.type = config.type or "generic"
+config.icon = config.icon or {}
 config.builder = "sPhone SPK Builder"
 config.builderVersion = "2.0"
 
