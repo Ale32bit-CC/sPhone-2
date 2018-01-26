@@ -28,6 +28,22 @@ local VBApps = {
     "sPhone.accountCreator",
 }
 
+local function sanitizeIcon(icon)
+    if type(icon) ~= "table" then
+        return {}
+    end
+    local out = {}
+    for y = 1,4 do
+        out[y] = {}
+        for x = 1,5 do
+            if icon[y] and icon[y][x] then
+                out[y][x] = icon[y][x]
+            end
+        end
+    end
+    return out
+end
+
 function spk.launch(id,...)
     if type(id) ~= "string" then
         error("bad argument #1 (expected string, got "..type(id)..")",2)
@@ -218,7 +234,7 @@ function spk.getInfo(id)
         author= config.author or "Unknown",
         version= config.version or "1.0",
         type= config.type or "generic",
-        icon= config.icon or {},
+        icon= sanitizeIcon(config.icon) or nil,
     }
 end
 
