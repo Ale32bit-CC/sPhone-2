@@ -71,7 +71,11 @@ config.builderVersion = "2.0"
 print("Config data:")
 
 for k,v in pairs(config) do
-    print(k..":"..v)
+    if type(v) == "string" then
+        print(k..":"..v)
+    elseif type(v) == "table" then
+        print(k..":"..textutils.serialize(v))
+    end
 end
 
 local out = {}
