@@ -218,6 +218,7 @@ function spk.getInfo(id)
         author= config.author or "Unknown",
         version= config.version or "1.0",
         type= config.type or "generic",
+        icon= config.icon or {},
     }
 end
 
