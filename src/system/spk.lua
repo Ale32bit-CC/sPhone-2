@@ -21,11 +21,11 @@ _G.spk = {}
 local systemApps = {
     "sPhone.shell",
     "sPhone.home",
-    "sPhone.accountCreator",
+    "sPhone.accountManager",
 }
 
 local VBApps = {
-    "sPhone.accountCreator",
+    "sPhone.accountManager",
 }
 
 local function sanitizeIcon(icon)

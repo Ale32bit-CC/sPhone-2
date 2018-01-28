@@ -1,0 +1,677 @@
+{
+  files = {
+    [ "main.lua" ] = "local endpoint = 'http://bot.merph.ovh:12345/api/v1/'\
+term.clear()\
+term.setCursorPos(1,1)\
+term.setBackgroundColor(colors.blue)\
+term.setTextColor(colors.white)\
+term.clear()\
+local shit = {\
+    [\"Content-type\"] = \"application/json\"\
+}\
+local function request()\
+    local requestAPI = {}\
+    local headers = {}\
+    local type = \"GET\"\
+    local data = \"\"\
+    local url = \"\"\
+    function requestAPI.set(a, b)\
+        headers[a] = b\
+        return requestAPI\
+    end\
+    function requestAPI.url(_url, ep)\
+        if ep then\
+            url = ep .. _url\
+            return requestAPI\
+        else\
+            url = _url\
+            return requestAPI\
+        end\
+    end\
+    function requestAPI.post()\
+        type = \"POST\"\
+        return requestAPI\
+    end\
+    function requestAPI.get()\
+        type = \"GET\"\
+        return requestAPI\
+    end\
+    function requestAPI.data(_data)\
+        if type == \"GET\" then\
+            type = \"POST\"\
+        end\
+        data = _data\
+        return requestAPI\
+    end\
+    function requestAPI.finalize()\
+        if type == \"GET\" then\
+            local handle = \"\"\
+   --         if not headers == {} then\
+                handle = http.get(url, headers)\
+     --       else\
+       --         handle = http.get(url)\
+         --   end\
+--            print(handle)\
+            local d = handle.readAll()\
+            handle.close()\
+            return d\
+        else\
+            local handle = http.post(url, data, headers)\
+            local d = handle.readAll()\
+            handle.close()\
+            return d\
+        end\
+    end\
+    return requestAPI\
+end\
+if not fs.exists('/.lib') then\
+    print(\"Could not find /.lib! Creating\")\
+    fs.makeDir('/.lib')\
+end\
+if not fs.exists('/.lib/json.lua') then\
+    print(\"Could not find JSON API. Downloading\")\
+    term.write(\"[.\")\
+    local handle = http.get(\"https://raw.githubusercontent.com/rxi/json.lua/master/json.lua\")\
+    term.write(\".\")\
+    local data = handle.readAll()\
+    term.write(\".\")\
+    handle.close()\
+    local handle = fs.open('/.lib/json.lua','w')\
+    term.write(\".\")\
+    handle.write(data)\
+    term.write(\".\")\
+    handle.close()\
+    term.write(\".]\\n\")\
+    print(\"Downloaded JSON API\")\
+end\
+local json = dofile('/.lib/json.lua')\
+print(\"Testing API\")\
+local data = request()\
+    .get()\
+    .url('ping',endpoint)\
+    .finalize()\
+print(data)\
+local json = dofile('/.lib/json.lua')\
+local handle = fs.open('/.sPhone/config/sPhone','r')\
+local data = textutils.unserialise(handle.readAll())\
+handle.close()\
+local w,h = term.getSize()\
+if not data[\"sCloud\"] then\
+    local function menu()\
+        term.clear()\
+        term.setCursorPos((w - 21)/2, 1)\
+        term.write(\"sCloud - Link account\")\
+        term.setCursorPos((w - 5)/2, 3)\
+        term.write(\"Login\")\
+        term.setCursorPos((w - 7)/2, 5)\
+        term.write(\"Sign up\")\
+        term.setCursorPos((w - 6)/2, 7)\
+        term.write(\"Cancel\")\
+        term.setCursorPos(1,h)\
+        term.write(\"Navigate using up/down\")\
+        local pos = 1\
+        local poses = {3,5,7}\
+        local function drawArrow()\
+            term.setCursorPos(1,3)\
+            term.write(\" \")\
+            term.setCursorPos(1,5)\
+            term.write(\" \")\
+            term.setCursorPos(1,7)\
+            term.write(\" \")\
+            term.setCursorPos(1,poses[pos])\
+            term.write(\">\")\
+        end\
+        drawArrow()\
+        local function up()\
+            if pos > 1 then\
+                pos = pos - 1\
+            else\
+                pos = 3\
+            end\
+        end\
+        local function down()\
+            if pos < 3 then\
+                pos = pos + 1\
+            else\
+                pos = 1\
+            end\
+        end\
+        while true do\
+            local ev = {os.pullEventRaw()}\
+            if ev[1] == \"terminate\" then\
+                return 3\
+            elseif ev[1] == \"key\" then\
+                if ev[2] == keys.w or ev[2] == keys.up then\
+                    up()\
+                    drawArrow()\
+                end\
+                if ev[2] == keys.s or ev[2] == keys.down then\
+                    down()\
+                    drawArrow()\
+                end\
+                if ev[2] == keys.enter then\
+                    return pos\
+                end\
+            elseif ev[1] == \"mouse_click\" then\
+                if ev[4] == 3 then\
+                    return 1\
+                end\
+                if ev[4] == 5 then\
+                    return 2\
+                end\
+                if ev[4] == 7 then\
+                    return 3\
+                end\
+            elseif ev[1] == \"mouse_scroll\" then\
+                if ev[2] == -1 then\
+                    up()\
+                    drawArrow()\
+                else\
+                    down()\
+                    drawArrow()\
+                end\
+            end\
+        end\
+    end\
+    local function login()\
+        term.clear()\
+        term.setCursorPos((w - 22)/2, 1)\
+        term.write(\"sCloud - Please log in\")\
+        term.setCursorPos(1, 2)\
+        term.write(\"Username\")\
+        term.setCursorPos(1, 3)\
+        local username = read()\
+        term.setCursorPos(1,4)\
+        term.write(\"Password\")\
+        term.setCursorPos(1, 5)\
+        local password = read(\"*\")\
+        term.setCursorPos(1,6)\
+        term.write(\"Logging in...\")\
+        local handle = http.post(endpoint .. 'accounts/login', json.encode({\
+            [\"username\"] = username,\
+            [\"password\"] = password\
+        }), shit)\
+        local data = json.decode(handle.readAll())\
+        handle.close()\
+        if data.status == \"ok\" then\
+            term.setCursorPos(1,8)\
+            term.write(\"Successfully logged in!\")\
+            local handle = fs.open('/.sPhone/config/sPhone','r')\
+            local data = textutils.unserialise(handle.readAll())\
+            handle.close()\
+            local handle = fs.open('/.sPhone/config/sPhone','w')\
+            data[\"sCloud\"] = {}\
+            data[\"sCloud\"].username = username\
+            data[\"sCloud\"].password = password\
+            handle.write(textutils.serialise(data))\
+            handle.close()\
+            sleep(1)\
+            return true\
+        else\
+            term.setCursorPos(1,8)\
+            term.write(\"Login failure! Try again\")\
+            term.setCursorPos(1,9)\
+            term.write(data.error.human)\
+            sleep(1)\
+            return false\
+        end\
+    end\
+    local function register()\
+        term.clear()\
+        term.setCursorPos((w - 17)/2, 1)\
+        term.write(\"sCloud - Register\")\
+        local username = \"\"\
+        while true do\
+            term.setCursorPos(1, 2)\
+            term.write(\"Your username\")\
+            term.setCursorPos(1, 3)\
+            term.write(string.rep(\" \", w))\
+            term.setCursorPos(1, 4)\
+            term.write(string.rep(\" \", w))\
+            term.setCursorPos(1, 3)\
+            username = read()\
+            local handle = http.get(endpoint .. 'accounts/exists/' .. textutils.urlEncode(username))\
+            local data = json.decode(handle.readAll())\
+            if data.exists then\
+                print(json.encode(data))\
+                term.setCursorPos(1, 20)\
+                term.write(\"Username already registered! Try again\")\
+                sleep(10)\
+            else\
+                break\
+            end\
+        end\
+        term.setCursorPos(1, 4)\
+        term.write(\"Password\")\
+        term.setCursorPos(1 ,5)\
+        local password = read(\"*\")\
+        while true do\
+            term.setCursorPos(1, 6)\
+            term.write(\"Confirm password\")\
+            term.setCursorPos(1, 7)\
+            term.write(string.rep(\" \", w))\
+            term.setCursorPos(1, 8)\
+            term.write(string.rep(\" \", w))\
+            term.setCursorPos(1, 7)\
+            local cpass = read(\"*\")\
+            if cpass == password then\
+                break\
+            else\
+                term.setCursorPos(1, 8)\
+                term.write(\"Passwords don't match! Try again\")\
+                sleep(1)\
+            end\
+        end\
+        term.setCursorPos(1, 8)\
+        term.write(\"Write a brief sentence about yourself\")\
+        term.setCursorPos(1, 9)\
+        local about = read()\
+        term.setCursorPos(1, 10)\
+        term.write(\"Signing up...\")\
+        local handle = http.post(endpoint .. 'accounts/create', json.encode({\
+            [\"username\"] = username,\
+            [\"password\"] = password,\
+            [\"about\"] = about,\
+            [\"avatar\"] = \"lel\"\
+        }), shit)\
+        local data = json.decode(handle.readAll())\
+        handle.close()\
+        if data.status == \"ok\" then\
+            term.setCursorPos(1, 11)\
+            term.write(\"Done\")\
+            term.setCursorPos(1, 12)\
+            print(\"Saving data... DO NOT TURN OFF THE DEVICE!\")\
+            local handle = fs.open('/.sPhone/config/sPhone','r')\
+            local data = textutils.unserialise(handle.readAll())\
+            handle.close()\
+            data[\"sCloud\"] = {\
+               [\"username\"] = username,\
+               [\"password\"] = password     \
+            }\
+            local handle = fs.open('/.sPhone/config/sPhone','w')\
+            handle.write(textutils.serialise(data))\
+            handle.close()\
+            sleep(1)\
+            return true\
+        else\
+            term.setCursorPos(1, 11)\
+            term.write(\"Error!\" .. data.error.human)\
+            sleep(1)\
+            return false\
+        end\
+    end\
+    while true do\
+        local out = menu()\
+        if out == 1 then\
+            local status = login()\
+            if status then\
+                term.clear()\
+                term.setCursorPos(1,1)\
+                print(\"App will exit in 3 seconds. Come back to manage your account!\")\
+                sleep(3)\
+                break\
+            end\
+            term.clear()\
+        elseif out == 2 then\
+            local status = register()\
+            if status then\
+                term.clear()\
+                term.setCursorPos(1,1)\
+                print(\"App will exit in 3 seconds. Come back to manage your account!\")\
+                sleep(3)\
+                break\
+            end\
+            term.clear()\
+        else\
+            term.clear()\
+            break\
+        end\
+    end    \
+else\
+    print(\"Found a user account on device.\") \
+    print(\"Attemtping login...\")\
+    local handle = http.post(endpoint .. 'accounts/login', json.encode({\
+        [\"username\"] = data[\"sCloud\"].username,\
+        [\"password\"] = data[\"sCloud\"].password\
+    }), shit)\
+    local response = json.decode(handle.readAll())\
+    handle.close()\
+    local userInfo = {}\
+    local function refetchInfo()\
+        local handle = http.get(endpoint .. 'accounts/' .. textutils.urlEncode(data[\"sCloud\"].username))\
+        local d = json.decode(handle.readAll())\
+        if d.status == \"ok\" then\
+            userInfo = d.data\
+           -- userInfo.level = tonumber(userInfo.level)\
+        else\
+            error(\"Unknown API error\",2)\
+        end\
+    end\
+    --refetchInfo()\
+    if response.status == \"ok\" then\
+        print(\"Logged in!\")\
+        refetchInfo()\
+        local function main()\
+            local arrpos = 1\
+            local levels = {\
+                [\"0\"] = \"Standard\", \
+                [\"1\"] = \"Donator\", \
+                [\"2\"] = \"sPhone staff\"\
+            }\
+            local function up()\
+                if arrpos == 1 then\
+                    arrpos = 5\
+                else\
+                    arrpos = arrpos - 1\
+                end\
+            end\
+            local function down()\
+                if arrpos == 5 then\
+                    arrpos = 1\
+                else\
+                    arrpos = arrpos + 1\
+                end\
+            end\
+            while true do\
+                term.clear()\
+                term.setCursorPos((w - 19) / 2,1)\
+                term.write(\"Your sCloud account\")\
+                term.setCursorPos((w - 8) / 2, 2)\
+                term.write(\"Username\")\
+                term.setCursorPos((w - #userInfo.username) / 2, 3)\
+                term.write(userInfo.username)\
+                term.setCursorPos((w - 9) / 2, 4)\
+                term.write(\"About you\")\
+                term.setCursorPos((w - #userInfo.about) / 2, 5)\
+                term.write(userInfo.about)\
+                term.setCursorPos((w - 9) / 2, 6)\
+                term.write(\"Your rank\")\
+                term.setCursorPos((w - #levels[userInfo.level]) / 2, 7)\
+                term.write(levels[userInfo.level])\
+                term.setCursorPos(1,8)\
+                term.write(string.rep(\"=\", w))\
+                term.setCursorPos((w - 15)/2, 9)\
+                term.write(\"Change password\")\
+                term.setCursorPos((w - 23)/2, 10)\
+                term.write(\"Change your description\")\
+                term.setCursorPos((w - 14)/2, 11)\
+                term.write(\"Delete account\")\
+                term.setCursorPos((w - 14)/2, 12)\
+                term.write(\"Unlink account\")\
+                term.setCursorPos((w - 4)/2, 13)\
+                term.write(\"Exit\")\
+                term.setCursorPos(1, arrpos + 8)\
+                term.write(\">\")\
+                local edata = {os.pullEventRaw()}\
+                if edata[1] == \"terminate\" then\
+                    return 3\
+                elseif edata[1] == \"key\" then\
+                    if edata[2] == keys.w or edata[2] == keys.up then\
+                        up()\
+                    end\
+                    if edata[2] == keys.s or edata[2] == keys.down then\
+                        down()\
+                    end\
+                    if edata[2] == keys.enter then\
+                        return arrpos\
+                    end\
+                elseif edata[1] == \"mouse_click\" then\
+                    if edata[4] == 9 then\
+                        return 1\
+                    end\
+                    if edata[4] == 10 then\
+                        return 2\
+                    end\
+                    if edata[4] == 11 then\
+                        return 3\
+                    end\
+                    if edata[4] == 12 then\
+                        return 4\
+                    end\
+                    if edata[4] == 13 then\
+                        return 5\
+                    end\
+                elseif edata[1] == \"mouse_scroll\" then\
+                    if edata[2] == -1 then\
+                        up()\
+                    else\
+                        down()\
+                    end\
+                end\
+            end        \
+        end\
+        local function chpass()\
+            term.clear()\
+            term.setCursorPos((w - 22)/2,1)\
+            term.write(\"Changing your password\")\
+            term.setCursorPos(1,2)\
+            print(\"Your old password\")\
+            local oldPass = read(\"*\")\
+            if oldPass ~= data[\"sCloud\"].password then\
+                print(\"Invalid password! Try again...\")\
+                sleep(2)\
+            else\
+                print(\"Now select your new password\")\
+                local newPass = read(\"*\")\
+                print(\"Confirm your new password\")\
+                local conf = read(\"*\")\
+                if newPass ~= conf then\
+                    print(\"Passwords do not match!\")\
+                    sleep(2)\
+                    return false\
+                else\
+                    print(\"Contacting API...\")\
+                    local handle = http.post(endpoint .. 'accounts/update', json.encode({\
+                        [\"username\"]=data[\"sCloud\"].username,\
+                        [\"password\"]=oldPass,\
+                        [\"newdata\"]={\
+                            [\"password\"]=newPass\
+                        }\
+                    }), shit)\
+                    local xdata = json.decode(handle.readAll())\
+                    handle.close()\
+                    if xdata.status == \"ok\" then\
+                        print(\"Applying changes to the device. DO NOT TURN THE DEVICE OFF!\")\
+                        local handle = fs.open('/.sPhone/config/sPhone','r')\
+                        local xxdata = textutils.unserialise(handle.readAll())\
+                        handle.close()\
+                        xxdata[\"sCloud\"].password = newPass\
+                        local handle = fs.open('/.sPhone/config/sPhone','w')\
+                        handle.write(textutils.serialise(xxdata))\
+                        handle.close()\
+                        data = xxdata\
+                        sleep(1)\
+                        print(\"Done!\")\
+                    else\
+                        print(\"An unknown error has occured!\\n\" .. xdata.error.human)\
+                        sleep(2)\
+                        return false\
+                    end\
+                end\
+            end     \
+        end\
+        local function chabout()\
+            term.clear()\
+            term.setCursorPos((w - 24) / 2, 1)\
+            term.write(\"Changing your description\")\
+            term.setCursorPos(1,2)\
+            print(\"Type select new description\")\
+            local newdesc = read()\
+            print(\"Contacting API\")\
+            local xhandle = http.post(endpoint .. 'accounts/update', json.encode({\
+                [\"username\"] = data[\"sCloud\"].username,\
+                [\"password\"] = data[\"sCloud\"].password,\
+                [\"newdata\"] = {\
+                    [\"about\"] = newdesc\
+                }\
+            }), shit)\
+            local handle = json.decode(xhandle.readAll())\
+            xhandle.close()\
+            if handle.status == \"ok\" then\
+                print(\"Done!\")\
+                sleep(1)\
+                return true\
+            else\
+                print(\"An error has occured!\\n\" .. handle.status.error)\
+                sleep(2)\
+                return false\
+            end\
+        end\
+        local function delacc()\
+            term.clear()\
+            term.setCursorPos((w - 16)/2,1)\
+            term.write(\"Confirm deletion\")\
+            term.setCursorPos((w - 21)/2,2)\
+            term.write(\"Type in your password\")\
+            term.setCursorPos(1,3)\
+            print(\"DELETING YOUR ACCOUNT WILL RESULT IN ALL YOUR DATA STORED IN THE CLOUD GETTING DESTROYED. HOLD CTRL+T IF YOU WISH TO CANCEL.\")\
+            print(\"IF YOU DO NOT WANT TO DELETE YOUR ACCOUNT BUT RATHER REMOVE IT FROM THIS DEVICE, SELECT \\\"unlink account\\\" IN THE MAIN MENU.\")\
+            local pass = read(\"*\")\
+            if pass == data[\"sCloud\"].password then\
+                print(\"Starting deletion...\")\
+                local handle = http.post(endpoint .. 'accounts/delete', json.encode({\
+                    [\"username\"] = data[\"sCloud\"].username,\
+                    [\"password\"] = data[\"sCloud\"].password\
+                }), shit)\
+                local xdata = json.decode(handle.readAll())\
+                handle.close()\
+                if xdata.status == \"ok\" then\
+                    print(\"Removing account data from device... DO NOT TURN YOUR DEVICE OFF!\")\
+                    local handle = fs.open('/.sPhone/config/sPhone','r')\
+                    local xxdata = textutils.unserialise(handle.readAll())\
+                    handle.close()\
+                    xxdata[\"sCloud\"] = nil\
+                    local handle = fs.open('/.sPhone/config/sPhone','w')\
+                    handle.write(textutils.serialise(xxdata))\
+                    handle.close()\
+                    sleep(1)\
+                    print(\"Done\")\
+                    return 1\
+                else\
+                    print(\"An error occured and the API has not returned ok. Please try again later!\\n\" .. xdata.error.human)\
+                    sleep(1)\
+                    return 1\
+                end\
+            else\
+                print(\"Invalid password\")\
+                sleep(1)\
+                return 0\
+            end\
+        end\
+        local function unlink()\
+            term.clear()\
+            term.setCursorPos((w - 17)/2,1)\
+            term.write(\"Unlinking account\")\
+            term.setCursorPos((w - 21)/2,2)\
+            term.write(\"Press enter to unlink\")\
+            term.setCursorPos((w - 25)/2,4)\
+            term.write(\"To cancel, press anything\")\
+            term.setCursorPos((w - 5)/2,5)\
+            term.write(\"else.\")\
+            local ev = os.pullEventRaw(\"key\")\
+            if ev[2] == keys.enter then\
+                print(\"\\nUnlinking account...\")\
+                local handle = fs.open('/.sPhone/config/sPhone','r')\
+                local data = textutils.unserialise(handle.readAll())\
+                handle.close()\
+                data[\"sCloud\"] = nil\
+                local handle = fs.open('/.sPhone/config/sPhone','w')\
+                handle.write(textutils.serialise(data))\
+                handle.close()\
+                sleep(1)\
+                return 1\
+            else\
+                print(\"\\nReturning to menu...\")\
+                sleep(1)\
+                return 0\
+            end\
+        end\
+        while true do\
+            refetchInfo()\
+            local status = main()\
+            if status == 1 then\
+                chpass()\
+            elseif status == 2 then\
+                chabout()\
+            elseif status == 3 then\
+                local xstat = delacc()\
+                if xstat == 1 then\
+                    term.clear()\
+                    term.setCursorPos(1,1)\
+                    term.write(\"Goodbye!\")\
+                    sleep(1)\
+                    break\
+                end\
+            elseif status == 4 then\
+                local xstat = unlink()\
+                if xstat == 1 then\
+                    term.clear()\
+                    term.setCursorPos(1,1)\
+                    term.write(\"Goodbye!\")\
+                    sleep(1)\
+                    break\
+                end\
+            elseif status == 5 then\
+                term.clear()\
+                term.setCursorPos(1,1)\
+                term.write(\"Goodbye!\")\
+                sleep(1)\
+                break\
+            end\
+        end\
+            \
+    else\
+        print(\"Could not log in! \" .. response.error.human)\
+        print(\"Removed entry from config. Please set up your account again\")\
+        local handle = fs.open('/.sPhone/config/sPhone','r')\
+        local d = textutils.unserialise(handle.readAll())\
+        handle.close()\
+        local handle = fs.open('/.sPhone/config/sPhone','w')\
+        d[\"sCloud\"] = nil\
+        handle.write(textutils.serialise(d))\
+        handle.close()\
+        print(\"Removed. Restart the app\")\
+        sleep(2)\
+    end\
+end",
+  },
+  config = {
+    icon = {
+      {
+        2048,
+        2,
+        2,
+        2,
+        2048,
+      },
+      {
+        2048,
+        2,
+        2048,
+        2048,
+        2,
+      },
+      {
+        2,
+        2,
+        2,
+        2,
+        2,
+      },
+      {
+        2,
+        2,
+        2,
+        2,
+        2,
+      },
+    },
+    id = "sPhone.accountManager",
+    name = "sPhone.accountManager",
+    builderVersion = "2.0",
+    builder = "sPhone SPK Builder",
+    author = "sPhone",
+    version = "1",
+    type = "generic",
+  },
+}
